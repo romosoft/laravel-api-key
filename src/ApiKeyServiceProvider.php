@@ -2,11 +2,10 @@
 
 namespace Leftsky\LaravelApiKey;
 
-use Filament\Facades\Filament;
 use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
 use Leftsky\LaravelApiKey\Console\Commands\GenerateApiKey;
-use Leftsky\LaravelApiKey\Filament\Resources\ApiKeyResource;
+use Leftsky\LaravelApiKey\Filament\ApiKeyPanelProvider;
 use Leftsky\LaravelApiKey\Http\Middleware\VerifyApiKey;
 use Leftsky\LaravelApiKey\Services\ApiKeyService;
 
@@ -26,6 +25,11 @@ class ApiKeyServiceProvider extends ServiceProvider
         $this->app->singleton('api-key', function ($app) {
             return new ApiKeyService();
         });
+        
+        // 注册面板提供者
+        if (config('api_key.enable_filament_integration', true)) {
+            $this->app->register(ApiKeyPanelProvider::class);
+        }
     }
 
     /**
@@ -53,14 +57,6 @@ class ApiKeyServiceProvider extends ServiceProvider
         // 有条件地加载路由
         if (config('api_key.routes.enabled', true)) {
             $this->loadRoutesFrom(__DIR__.'/../routes/api.php');
-        }
-        
-        // 如果启用了Filament集成并且Filament存在
-        if (config('api_key.enable_filament_integration', true) && class_exists('Filament\Facades\Filament')) {
-            // 注册Filament资源
-            Filament::registerResources([
-                ApiKeyResource::class,
-            ]);
         }
         
         // 注册命令
