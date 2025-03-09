@@ -5,6 +5,7 @@ namespace Leftsky\LaravelApiKey\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ApiKey extends Model
 {
@@ -104,6 +105,14 @@ class ApiKey extends Model
     {
         $userModel = config('api_key.user_model', 'App\\Models\\User');
         return $this->belongsTo($userModel);
+    }
+
+    /**
+     * 获取此API密钥的使用日志
+     */
+    public function logs(): HasMany
+    {
+        return $this->hasMany(ApiLog::class);
     }
 
     /**

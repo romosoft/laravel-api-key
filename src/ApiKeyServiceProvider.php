@@ -5,9 +5,12 @@ namespace Leftsky\LaravelApiKey;
 use Illuminate\Routing\Router;
 use Illuminate\Support\ServiceProvider;
 use Leftsky\LaravelApiKey\Console\Commands\GenerateApiKey;
+use Leftsky\LaravelApiKey\Console\Commands\CleanApiLogs;
 use Leftsky\LaravelApiKey\Filament\ApiKeyPanelProvider;
 use Leftsky\LaravelApiKey\Http\Middleware\VerifyApiKey;
+use Leftsky\LaravelApiKey\Http\Middleware\ApiKeyLoggingMiddleware;
 use Leftsky\LaravelApiKey\Services\ApiKeyService;
+use Leftsky\LaravelApiKey\Services\ApiLogService;
 
 class ApiKeyServiceProvider extends ServiceProvider
 {
@@ -24,6 +27,11 @@ class ApiKeyServiceProvider extends ServiceProvider
         // 注册API密钥服务
         $this->app->singleton('api-key', function ($app) {
             return new ApiKeyService();
+        });
+        
+        // 注册API日志服务
+        $this->app->singleton(ApiLogService::class, function ($app) {
+            return new ApiLogService();
         });
         
         // 注册面板提供者
@@ -53,6 +61,7 @@ class ApiKeyServiceProvider extends ServiceProvider
         // 注册中间件
         $router = $this->app->make(Router::class);
         $router->aliasMiddleware('api.key', VerifyApiKey::class);
+        $router->aliasMiddleware('api.log', ApiKeyLoggingMiddleware::class);
 
         // 有条件地加载路由
         if (config('api_key.routes.enabled', true)) {
@@ -63,6 +72,7 @@ class ApiKeyServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 GenerateApiKey::class,
+                CleanApiLogs::class,
             ]);
         }
     }

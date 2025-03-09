@@ -1,9 +1,9 @@
 {
     "name": "leftsky/laravel-api-key",
-    "description": "Laravel API密钥管理系统，支持API密钥的创建、验证和管理，包含完整的Filament管理界面",
+    "description": "Laravel API密钥管理系统，支持API密钥的创建、验证和管理，包含完整的Filament管理界面和API调用日志功能",
     "type": "library",
-    "version": "1.0.0",
-    "keywords": ["laravel", "api", "key", "token", "authentication", "filament"],
+    "version": "1.0.1",
+    "keywords": ["laravel", "api", "key", "token", "authentication", "filament", "logging", "api-logs"],
     "license": "MIT",
     "authors": [
         {
@@ -15,14 +15,16 @@
         "php": "^8.2",
         "illuminate/support": "^12.0",
         "illuminate/database": "^12.0",
-        "illuminate/http": "^12.0"
+        "illuminate/http": "^12.0",
+        "filament/forms": "^3.0",
+        "filament/tables": "^3.0"
     },
     "require-dev": {
         "orchestra/testbench": "^9.0",
         "phpunit/phpunit": "^10.0"
     },
     "suggest": {
-        "filament/filament": "提供API密钥管理界面"
+        "filament/filament": "提供API密钥和API调用日志管理界面"
     },
     "autoload": {
         "psr-4": {
