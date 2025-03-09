@@ -83,7 +83,7 @@ class ApiLogService
         $data = $request->except(['password', 'password_confirmation', 'token']);
 
         // 如果请求有文件，我们只记录文件名
-        if ($request->hasFile()) {
+        if (count($request->files) > 0) {
             foreach ($request->files->all() as $key => $file) {
                 if (is_array($file)) {
                     $fileNames = [];
