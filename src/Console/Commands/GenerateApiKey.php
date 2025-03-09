@@ -23,13 +23,16 @@ class GenerateApiKey extends Command
      *
      * @var string
      */
-    protected $description = '为指定用户生成一个新的API密钥';
+    protected $description = '为指定用户生成一个新的API密钥 (Laravel API Key v1.0)';
 
     /**
      * 执行命令
      */
     public function handle(ApiKeyService $apiKeyService)
     {
+        $this->info('Laravel API Key v1.0.0');
+        $this->line('----------------------------');
+        
         $userId = $this->argument('user');
         
         $options = [

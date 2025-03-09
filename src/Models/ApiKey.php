@@ -36,6 +36,53 @@ class ApiKey extends Model
         'last_used_at' => 'datetime',
         'expires_at' => 'datetime',
     ];
+    
+    /**
+     * 序列化时隐藏的属性
+     *
+     * @var array<int, string>
+     */
+    protected $hidden = [
+        'key',
+    ];
+    
+    /**
+     * 获取掩码的密钥（仅显示前8位）
+     *
+     * @return string
+     */
+    public function getMaskedKeyAttribute(): string
+    {
+        return substr($this->key, 0, 8) . '...';
+    }
+    
+    /**
+     * 检查密钥是否过期
+     * 
+     * @return bool
+     */
+    public function getIsExpiredAttribute(): bool
+    {
+        if (!$this->expires_at) {
+            return false;
+        }
+        
+        return now()->greaterThan($this->expires_at);
+    }
+    
+    /**
+     * 获取有效期状态（无限或日期）
+     * 
+     * @return string
+     */
+    public function getExpiryStatusAttribute(): string
+    {
+        if (!$this->expires_at) {
+            return '无限期';
+        }
+        
+        return $this->is_expired ? '已过期' : $this->expires_at->format('Y-m-d H:i:s');
+    }
 
     /**
      * 创建新实例时的引导方法
@@ -77,7 +124,7 @@ class ApiKey extends Model
             return false;
         }
 
-        if ($this->expires_at && now()->greaterThan($this->expires_at)) {
+        if ($this->is_expired) {
             return false;
         }
 

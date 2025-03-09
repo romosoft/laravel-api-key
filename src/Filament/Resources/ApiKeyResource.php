@@ -51,6 +51,7 @@ class ApiKeyResource extends Resource
                             ->columnSpanFull(),
                         Forms\Components\DateTimePicker::make('expires_at')
                             ->label('过期时间')
+                            ->helperText('留空表示永不过期')
                             ->nullable(),
                         Forms\Components\Toggle::make('is_active')
                             ->label('是否激活')
@@ -66,13 +67,12 @@ class ApiKeyResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->label('名称')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('key')
+                Tables\Columns\TextColumn::make('masked_key')
                     ->label('密钥')
-                    ->formatStateUsing(fn (string $state): string => substr($state, 0, 8) . '...')
-                    ->copyable()
-                    ->copyableState(fn (ApiKey $record): string => $record->key)
-                    ->searchable()
-                    ->tooltip(fn (ApiKey $record): string => $record->key),
+                    ->tooltip('出于安全考虑，密钥仅显示前8位')
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        return $query->where('key', 'like', "%{$search}%");
+                    }),
                 Tables\Columns\TextColumn::make('description')
                     ->label('描述')
                     ->limit(30),
@@ -82,11 +82,18 @@ class ApiKeyResource extends Resource
                 Tables\Columns\TextColumn::make('last_used_at')
                     ->label('最后使用时间')
                     ->dateTime()
+                    ->placeholder('从未使用')
                     ->sortable(),
-                Tables\Columns\TextColumn::make('expires_at')
+                Tables\Columns\TextColumn::make('expiry_status')
                     ->label('过期时间')
-                    ->dateTime()
-                    ->sortable(),
+                    ->badge()
+                    ->color(fn (string $state): string => 
+                        $state === '无限期' ? 'primary' :
+                        (str_contains($state, '已过期') ? 'danger' : 'success')
+                    )
+                    ->sortable(query: fn (Builder $query, string $direction): Builder => 
+                        $query->orderBy('expires_at', $direction)
+                    ),
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('创建时间')
                     ->dateTime()
@@ -105,9 +112,18 @@ class ApiKeyResource extends Resource
                     ->modalDescription('确定要重新生成此API密钥吗？旧密钥将立即失效，使用旧密钥的应用程序需要更新。')
                     ->modalSubmitActionLabel('重新生成')
                     ->action(function (ApiKey $record) {
+                        $newKey = ApiKey::generateKey();
                         $record->update([
-                            'key' => ApiKey::generateKey()
+                            'key' => $newKey
                         ]);
+                        
+                        // 显示通知，包含新密钥
+                        \Filament\Notifications\Notification::make()
+                            ->title('API密钥已重新生成')
+                            ->body("新API密钥: {$newKey}\n请保存此密钥，它不会再次显示。")
+                            ->warning()
+                            ->persistent()
+                            ->send();
                     }),
                 Tables\Actions\DeleteAction::make(),
             ])
