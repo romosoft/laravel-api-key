@@ -72,14 +72,14 @@ class ApiLogResource extends Resource
                 
                 Forms\Components\Section::make('请求数据')
                     ->schema([
-                        Forms\Components\JsonEditor::make('request_data')
+                        Forms\Components\TextInput::make('request_data')
                             ->label('请求数据')
                             ->disabled(),
                     ]),
                 
                 Forms\Components\Section::make('响应数据')
                     ->schema([
-                        Forms\Components\JsonEditor::make('response_data')
+                        Forms\Components\TextInput::make('response_data')
                             ->label('响应数据')
                             ->disabled(),
                     ]),
