@@ -11,18 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        $tableName = config('api_key.table_name', 'api_keys');
+        $tableName = 'api_keys';
         
         Schema::create($tableName, function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->string('name');
-            $table->string('key', 64)->unique();
-            $table->text('description')->nullable();
-            $table->json('permissions')->nullable();
-            $table->boolean('is_active')->default(true);
-            $table->timestamp('last_used_at')->nullable();
-            $table->timestamp('expires_at')->nullable();
+            $table->id()->comment('主键');
+            $table->unsignedBigInteger('user_id')->comment('用户ID');
+            $table->string('name')->comment('名称');
+            $table->string('key', 64)->unique()->comment('密钥');
+            $table->text('description')->nullable()->comment('描述');
+            $table->json('permissions')->nullable()->comment('权限');
+            $table->boolean('is_active')->default(true)->comment('是否激活');
+            $table->timestamp('last_used_at')->nullable()->comment('最后使用时间');
+            $table->timestamp('expires_at')->nullable()->comment('过期时间');
             $table->timestamps();
         });
     }
@@ -32,7 +32,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        $tableName = config('api_key.table_name', 'api_keys');
+        $tableName = 'api_keys';
         
         Schema::dropIfExists($tableName);
     }
